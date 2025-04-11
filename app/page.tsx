@@ -1,103 +1,128 @@
+"use client";
+import { useState, useEffect, useRef } from "react";
+
 import Image from "next/image";
+import Link from "next/link";
 
-export default function Home() {
+interface LastPlayingTrack {
+  image: { "#text": string; size: string }[];
+  artist: {
+    "#text": string;
+    mbid: string;
+  };
+  album: {
+    "#text": string;
+    mbid: string;
+  };
+  "@attr"?: {
+    nowplaying?: string;
+  };
+  name: string;
+  streamable: number;
+  mbid: string;
+  url: string;
+}
+
+export default function MyPlayiingWidget() {
+  const user = process.env.NEXT_PUBLIC_LAST_FM_USERNAME;
+  const apiKey = process.env.NEXT_PUBLIC_API_KEY;
+  const apiUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}&user=${user}&api_key=${apiKey}&format=json&limit=5`;
+  const noMusicPlayingRef = useRef<NodeJS.Timeout | number | undefined>(0);
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const [lastPlayingTrack, setLastPlayingTrack] = useState<LastPlayingTrack>({
+    image: [],
+    artist: { "#text": "", mbid: "" },
+    album: { "#text": "", mbid: "" },
+    "@attr": { nowplaying: "" },
+    name: "",
+    streamable: 0,
+    mbid: "",
+    url: "",
+  });
+
+  useEffect(() => {
+    fetchLastFMData();
+    noMusicPlayingRef.current = setInterval(() => {
+      fetchLastFMData();
+    }, 15000);
+    return () => clearInterval(noMusicPlayingRef.current);
+  }, []);
+
+  useEffect(() => {
+    if (isMusicPlaying) {
+      clearInterval(noMusicPlayingRef.current);
+      noMusicPlayingRef.current = setInterval(() => {
+        fetchLastFMData();
+      }, 7000);
+    } else {
+      clearInterval(noMusicPlayingRef.current);
+    }
+    return () => clearInterval(noMusicPlayingRef.current);
+  }, [isMusicPlaying]);
+
+  const fetchLastFMData = async () => {
+    try {
+      fetch(apiUrl)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data?.recenttracks?.track && data?.recenttracks?.track.length) {
+            setLastPlayingTrack(data.recenttracks.track[0]);
+            if (
+              data?.recenttracks?.track[0]["@attr"] &&
+              data?.recenttracks?.track[0]["@attr"]?.nowplaying
+            ) {
+              setIsMusicPlaying(true);
+            } else {
+              setIsMusicPlaying(false);
+            }
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+    <Link
+      className="lastfm-widget p-1 cursor-pointer flex w-[350px] h-[80px] rounded-xl bg-[#3436429e] gap-4 items-center relative shadow-xl"
+      href={lastPlayingTrack.url}
+      target="_blank"
+    >
+      {lastPlayingTrack.image?.[2]?.["#text"] && (
         <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
+          src={lastPlayingTrack.image[2]["#text"]}
+          alt="playing"
+          className="w-[23%] h-full rounded-xl"
+          width={45}
+          height={45}
         />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+      )}
+      {isMusicPlaying && (
+        <Image
+          src="/animation.gif"
+          alt="playing"
+          className="absolute top-1/6 left-[5%] w-[45px]"
+          width={45}
+          height={20}
+        />
+      )}
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      <span className="flex w-[90%] h-[75%] flex-col justify-evenly items-start px-3">
+        <span className="max-w-52 overflow-ellipsis overflow-hidden whitespace-nowrap font-sans">
+          <span className="text-lg font-bold">{lastPlayingTrack.name}</span>
+          <span className="text-md font-medium">
+            {lastPlayingTrack?.artist?.["#text"]
+              ? ` - ${lastPlayingTrack.artist["#text"]}`
+              : ""}
+          </span>
+        </span>
+        <span className="font-normal font-mono max-w-[200px] text-ellipsis overflow-hidden whitespace-nowrap text-xs">
+          {lastPlayingTrack.album["#text"]}
+        </span>
+      </span>
+    </Link>
   );
 }
