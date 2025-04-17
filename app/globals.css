@@ -30,6 +30,7 @@ body {
 
 .listening-music-container {
     position: absolute;
+    right: 2%;
 }
 
 .music {
