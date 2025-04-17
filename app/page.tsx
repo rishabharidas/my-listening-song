@@ -57,6 +57,9 @@ export default function MyPlayingWidget() {
       }, 7000);
     } else {
       clearInterval(noMusicPlayingRef.current);
+      noMusicPlayingRef.current = setInterval(() => {
+        fetchLastFMData();
+      }, 15000);
     }
     return () => clearInterval(noMusicPlayingRef.current);
   }, [isMusicPlaying]);
