@@ -167,7 +167,10 @@ export default function MyPlayingWidget() {
                 />
               )}
 
-              <span className="flex w-[90%] h-[75%] flex-col justify-evenly items-start px-3">
+              <span className="flex w-[90%] h-[75%] flex-col justify-evenly items-start px-2">
+                {isMusicPlaying && (
+                  <span className="text-xs font-light font-sans tracking-wide">Listening to </span>
+                )}
                 <span className="max-w-52 overflow-ellipsis overflow-hidden whitespace-nowrap font-sans">
                   <span className="text-lg font-bold">
                     {lastPlayingTrack.name}
