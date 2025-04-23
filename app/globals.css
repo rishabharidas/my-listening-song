@@ -2,8 +2,8 @@
 
 :root {
     --background: transparent;
-    --foreground: #ededed;
-    /* --foreground: #171717; */
+    /* --foreground: #ededed; */
+    --foreground: #171717;
 }
 
 @theme inline {
@@ -15,12 +15,12 @@
 
 /* disabled to add dark and whiet theme suuport later */
 
-/* @media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: dark) {
     :root {
         --background: transparent;
         --foreground: #ededed;
     }
-} */
+}
 
 body {
     background: var(--background);
@@ -46,7 +46,7 @@ body {
     width: 2px;
     height: 3px;
     border-radius: 13px;
-    background: white;
+    background: var(--foreground);
     animation: loader 1.5s ease-in-out infinite;
 }
 
@@ -61,31 +61,31 @@ body {
 }
 
 .music .bar:nth-child(1) {
-    background: white;
+    background: var(--foreground);
     animation-delay: 0.8s;
 }
 
 .music .bar:nth-child(2) {
-    background: white;
+    background: var(--foreground);
     animation-delay: 0.4s;
 }
 
 .music .bar:nth-child(3) {
-    background: white;
+    background: var(--foreground);
     animation-delay: 0s;
 }
 
 .music .bar:nth-child(4) {
-    background: white;
+    background: var(--foreground);
     animation-delay: 0s;
 }
 
 .music .bar:nth-child(5) {
-    background: white;
+    background: var(--foreground);
     animation-delay: 0.4s;
 }
 
 .music .bar:nth-child(6) {
-    background: white;
+    background: var(--foreground);
     animation-delay: 0.8s;
 }
